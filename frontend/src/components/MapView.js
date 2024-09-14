@@ -3,9 +3,10 @@ import mapboxgl from 'mapbox-gl';
 import axios from '../services/api'; // Ensure axios instance is correctly imported
 import 'mapbox-gl/dist/mapbox-gl.css'; // Import the Mapbox CSS
 import '../App.css'; // Import custom CSS if needed
-import Slider from '@mui/material/Slider'; // Corrected import for Slider component
+import Slider from '@mui/material/Slider'; // Import Material UI Slider component
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'; // Import Material UI arrow icon
 
+// Set your Mapbox access token
 mapboxgl.accessToken = 'pk.eyJ1Ijoid29sZm1hbjUiLCJhIjoiY20xMWl3aW5iMDNzaTJyb2lhMWI5MzBnaSJ9.eDVXFDM_gOY1J4k_YHJMsg'; // Replace with your Mapbox access token
 
 const MapView = () => {
@@ -41,7 +42,7 @@ const MapView = () => {
     const mapInstance = initializeMap();
 
     return () => mapInstance.remove(); // Clean up the map instance when the component is unmounted
-  }, [year]); // Re-run the effect if year changes
+  }, [year]); // Re-run the effect if the year changes
 
   const fetchAndDisplayData = (longitude, latitude, year) => {
     const formData = new FormData();
@@ -50,7 +51,7 @@ const MapView = () => {
     formData.append('year', year);
 
     axios
-      .post('/neural-network-response', formData)
+      .post('/display-all-longandlat', formData)
       .then((response) => {
         const healthData = response.data;
 
@@ -64,9 +65,7 @@ const MapView = () => {
                 type: 'Point',
                 coordinates: [point.longitude, point.latitude],
               },
-              properties: {
-                healthScore: point.healthScore,
-              },
+              
             })),
           },
         };
@@ -148,7 +147,7 @@ const MapView = () => {
         }
       })
       .catch((error) => {
-        console.error('Error fetching data from neuralnetwork-response:', error);
+        console.error('Error fetching data from FastAPI:', error);
       });
   };
 
