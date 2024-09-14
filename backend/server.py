@@ -22,11 +22,11 @@ async def neural_network_response(latitude: float=Form(), longitude: float=Form(
     return latitude, longitude, date
 
 @app.post("/display-all-longandlat")
-async def display_all_longandlat():
+async def display_all_longandlat(year: int=Form()):
     file_path = "spreadsheets/2016_2024_Data.csv"
 
     data = pd.read_csv(file_path)
-    data_2024 = data[data['Year'] == 2024].copy()
+    data_2024 = data[data['Year'] == year].copy()
 
     print("Sample 2024 data:", data_2024.head())
 
