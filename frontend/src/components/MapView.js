@@ -46,8 +46,15 @@ const MapView = () => {
 
   // Function to fetch data from the backend and display on the map
   const fetchAndDisplayData = (longitude, latitude, year) => {
+    // Create a FormData object
+    const formData = new FormData();
+    formData.append('longitude', longitude);
+    formData.append('latitude', latitude);
+    formData.append('year', year);
+
+    // Send the FormData to the backend using axios
     axios
-      .post('/neuralnetwork-response', { longitude, latitude, year })
+      .post('/neuralnetwork-response', formData)
       .then((response) => {
         const healthData = response.data;
 
