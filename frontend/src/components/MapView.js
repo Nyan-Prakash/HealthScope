@@ -43,7 +43,7 @@ const MapView = () => {
 
     // Fetch data from the backend
     axios
-      .post('/display-all-longandlat')
+      .post('/display-all-longandlat', formData)
       .then((response) => {
         const healthData = response.data; // Assume response data is an array of points
 
