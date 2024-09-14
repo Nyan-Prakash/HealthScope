@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
-import axios from '../services/api'; // Ensure axios instance is correctly imported
+import axios from '../services/api'; // Import your configured Axios instance
 import 'mapbox-gl/dist/mapbox-gl.css'; // Import the Mapbox CSS
-import '../App.css'; // Import custom CSS if needed
 import Slider from '@mui/material/Slider'; // Import Material UI Slider component
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'; // Import Material UI arrow icon
 
@@ -12,7 +11,6 @@ mapboxgl.accessToken = 'pk.eyJ1Ijoid29sZm1hbjUiLCJhIjoiY20xMWl3aW5iMDNzaTJyb2lhM
 const MapView = () => {
   const mapContainerRef = useRef(null); // Ref to store the map container DOM node
   const [year, setYear] = useState(2024); // State to store the year
-  const [mapCenter, setMapCenter] = useState([-122.4194, 37.7749]); // Initial center coordinates
   const [map, setMap] = useState(null); // State to store the map instance
 
   useEffect(() => {
@@ -20,20 +18,14 @@ const MapView = () => {
     const initializeMap = () => {
       const mapInstance = new mapboxgl.Map({
         container: mapContainerRef.current, // Specify the container ID
-        style: 'mapbox://styles/wolfman5/cm12gbei7004x01pc3rjz2sbf', // Mapbox style URL
-        center: mapCenter, // Initial map center [longitude, latitude]
+        style: 'mapbox://styles/mapbox/streets-v11', // Mapbox style URL
+        center: [-122.4194, 37.7749], // Initial map center [longitude, latitude]
         zoom: 10, // Initial zoom level
       });
 
       mapInstance.on('load', () => {
         setMap(mapInstance); // Store the map instance in state
-        fetchAndDisplayData(mapInstance.getCenter().lng, mapInstance.getCenter().lat, year);
-      });
-
-      mapInstance.on('moveend', () => {
-        const center = mapInstance.getCenter(); // Get current center of the map
-        setMapCenter([center.lng, center.lat]); // Update map center state
-        fetchAndDisplayData(center.lng, center.lat, year); // Fetch data from the backend
+        fetchAndDisplayData(mapInstance, year); // Fetch data when the map loads
       });
 
       return mapInstance;
@@ -44,125 +36,113 @@ const MapView = () => {
     return () => mapInstance.remove(); // Clean up the map instance when the component is unmounted
   }, [year]); // Re-run the effect if the year changes
 
-  const fetchAndDisplayData = (longitude, latitude, year) => {
-    if (!map) {
-      console.error('Map instance is not initialized');
-      return;
-    }
-  
+  const fetchAndDisplayData = (mapInstance, year) => {
+    // Create a FormData object to send to the backend
     const formData = new FormData();
-    formData.append('longitude', longitude);
-    formData.append('latitude', latitude);
     formData.append('year', year);
-  
+
+    // Fetch data from the backend
     axios
-      .post('/display-all-longandlat') // Ensure formData is being sent correctly
+      .post('/display-all-longandlat')
       .then((response) => {
-        const healthData = response.data;
-  
-        console.log(healthData);
-        console.log("fsdsfsdf"+healthData[0]?.Latitude); // Safely access healthData properties to avoid undefined errors
-  
-        const geojsonSource = {
-          type: 'geojson',
-          data: {
-            type: 'FeatureCollection',
-            features: healthData.map((point) => ({
-              type: 'Feature',
-              geometry: {
-                type: 'Point',
-                coordinates: [point.Longitude, point.Latitude],
-              },
-              properties: {
-                healthScore: point.Longitude,
-              },
-            })),
+        const healthData = response.data; // Assume response data is an array of points
+
+        console.log(healthData); // Debugging: log the fetched data
+
+        const healthDataMap = healthData.map((point) => ({
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [point.longitude, point.latitude], // Use longitude and latitude for point locations
           },
-        };
-  
-        try {
-          const existingSource = map.getSource('health-data');
-          if (existingSource) {
-            console.log('Source exists, updating data...');
-            existingSource.setData(geojsonSource.data);
-          } else {
-            console.log('Adding new source and layers...');
-            map.addSource('health-data', geojsonSource);
-  
-            map.addLayer({
-              id: 'health-heatmap',
-              type: 'heatmap',
-              source: 'health-data',
-              maxzoom: 15,
-              paint: {
-                'heatmap-weight': ['interpolate', ['linear'], ['get', 'healthScore'], 0, 0, 100, 1],
-                'heatmap-color': [
-                  'interpolate',
-                  ['linear'],
-                  ['heatmap-density'],
-                  0, 'rgba(0, 0, 255, 0)',
-                  0.2, 'rgba(255, 165, 0, 0.6)',
-                  0.4, 'rgba(255, 140, 0, 0.6)',
-                  0.6, 'rgba(255, 69, 0, 0.6)',
-                  1, 'rgba(255, 0, 0, 1)',
-                ],
-                'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 2, 15, 20],
-                'heatmap-opacity': 0.8,
-              },
-            });
-  
-            map.addLayer({
-              id: 'health-points',
-              type: 'circle',
-              source: 'health-data',
-              minzoom: 5,
-              paint: {
-                'circle-radius': ['interpolate', ['linear'], ['get', 'healthScore'], 0, 4, 100, 12],
-                'circle-color': [
-                  'interpolate',
-                  ['linear'],
-                  ['get', 'healthScore'],
-                  0, 'rgba(255, 0, 0, 0.5)',
-                  50, 'rgba(255, 165, 0, 0.5)',
-                  100, 'rgba(0, 255, 0, 0.5)',
-                ],
-                'circle-stroke-color': [
-                  'interpolate',
-                  ['linear'],
-                  ['get', 'healthScore'],
-                  0, 'rgba(255, 0, 0, 1)',
-                  50, 'rgba(255, 165, 0, 1)',
-                  100, 'rgba(0, 255, 0, 1)',
-                ],
-                'circle-stroke-width': 2,
-                'circle-stroke-opacity': 1,
-                'circle-opacity': 0.5,
-              },
-            });
-          }
-        } catch (error) {
-          console.error('Error working with map source or layers:', error);
+          properties: {
+            healthScore: point.healthScore, // Use health score for styling
+          },
+        }));
+
+        if (mapInstance.getSource('health-data')) {
+          mapInstance.getSource('health-data').setData({
+            type: 'FeatureCollection',
+            features: healthDataMap,
+          });
+        } else {
+          // Add GeoJSON source
+          mapInstance.addSource('health-data', {
+            type: 'geojson',
+            data: {
+              type: 'FeatureCollection',
+              features: healthDataMap,
+            },
+          });
+
+          // Add heatmap layer
+          mapInstance.addLayer({
+            id: 'health-heatmap',
+            type: 'heatmap',
+            source: 'health-data',
+            maxzoom: 15,
+            paint: {
+              'heatmap-weight': ['interpolate', ['linear'], ['get', 'healthScore'], 0, 0, 100, 1],
+              'heatmap-color': [
+                'interpolate',
+                ['linear'],
+                ['heatmap-density'],
+                0, 'rgba(0, 0, 255, 0)',
+                0.2, 'rgba(255, 165, 0, 0.6)',
+                0.4, 'rgba(255, 140, 0, 0.6)',
+                0.6, 'rgba(255, 69, 0, 0.6)',
+                1, 'rgba(255, 0, 0, 1)',
+              ],
+              'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 2, 15, 20],
+              'heatmap-opacity': 0.8,
+            },
+          });
+
+          // Add a circle layer for points
+          mapInstance.addLayer({
+            id: 'health-points',
+            type: 'circle',
+            source: 'health-data',
+            minzoom: 5,
+            paint: {
+              // Increase the size of the circle points based on health score
+              'circle-radius': ['interpolate', ['linear'], ['get', 'healthScore'], 0, 8, 100, 24],
+              'circle-color': [
+                'interpolate',
+                ['linear'],
+                ['get', 'healthScore'],
+                0, 'rgba(255, 0, 0, 0.5)',
+                50, 'rgba(255, 165, 0, 0.5)',
+                100, 'rgba(0, 255, 0, 0.5)',
+              ],
+              'circle-stroke-color': [
+                'interpolate',
+                ['linear'],
+                ['get', 'healthScore'],
+                0, 'rgba(255, 0, 0, 1)',
+                50, 'rgba(255, 165, 0, 1)',
+                100, 'rgba(0, 255, 0, 1)',
+              ],
+              'circle-stroke-width': 2,
+              'circle-opacity': 0.5,
+            },
+          });
         }
       })
       .catch((error) => {
-        console.error('Error fetching data from FastAPI:', error);
+        console.error('Error fetching data from neural-network-response:', error);
       });
   };
-  
-  
+
   const handleSliderChange = (event, newValue) => {
     setYear(newValue); // Update the year state when the slider changes
-  };
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
     <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', margin: 0 }}>
       {/* Back to Top Arrow */}
       <button
-        onClick={scrollToTop}
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         style={{
           position: 'absolute',
           top: '10px',
@@ -178,29 +158,6 @@ const MapView = () => {
       >
         <ArrowUpwardIcon />
       </button>
-
-      {/* Improved Banner in the Top Right */}
-      <div
-        className="banner"
-        style={{
-          position: 'absolute',
-          top: '10px',
-          right: '10px',
-          zIndex: 1,
-          backgroundColor: 'rgba(0, 0, 0, 0.7)',
-          color: '#ffffff',
-          padding: '15px 20px',
-          borderRadius: '8px',
-          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
-          textAlign: 'center',
-          maxWidth: '250px',
-        }}
-      >
-        <h1 style={{ fontSize: '30px', margin: '0 0 10px 0' }}>HealthScope</h1>
-        <p style={{ fontSize: '10px', margin: 0 }}>
-          Scroll through the timeline to see how health risk factors have changed over time.
-        </p>
-      </div>
 
       {/* Year Slider */}
       <div
