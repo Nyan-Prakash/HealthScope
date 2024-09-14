@@ -13,7 +13,7 @@ const App = () => {
     <div className="App">
       {/* App Title */}
       <header className="App-header">
-        <h1>Health Data Heat Map</h1>
+        <h1>Not a front for drugs</h1>
       </header>
 
       {/* Filter Component */
