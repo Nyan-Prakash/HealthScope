@@ -1,14 +1,16 @@
-// src/components/MapView.jsx
 import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import axios from '../services/api'; // Ensure axios instance is correctly imported
-import 'mapbox-gl/dist/mapbox-gl.css';
+import 'mapbox-gl/dist/mapbox-gl.css'; // Import the Mapbox CSS
+import '../App.css'; // Import custom CSS if needed
+import Slider from '@mui/material/Slider'; // Corrected import for Slider component
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'; // Import Material UI arrow icon
 
 mapboxgl.accessToken = 'pk.eyJ1Ijoid29sZm1hbjUiLCJhIjoiY20xMWl3aW5iMDNzaTJyb2lhMWI5MzBnaSJ9.eDVXFDM_gOY1J4k_YHJMsg'; // Replace with your Mapbox access token
 
 const MapView = () => {
   const mapContainerRef = useRef(null); // Ref to store the map container DOM node
-  const [year, setYear] = useState(2024); // State to store the year (modify as needed)
+  const [year, setYear] = useState(2024); // State to store the year
   const [mapCenter, setMapCenter] = useState([-122.4194, 37.7749]); // Initial center coordinates
   const [map, setMap] = useState(null); // State to store the map instance
 
@@ -17,7 +19,7 @@ const MapView = () => {
     const initializeMap = () => {
       const mapInstance = new mapboxgl.Map({
         container: mapContainerRef.current, // Specify the container ID
-        style: 'mapbox://styles/mapbox/streets-v11', // Mapbox style URL
+        style: 'mapbox://styles/wolfman5/cm12gbei7004x01pc3rjz2sbf', // Mapbox style URL
         center: mapCenter, // Initial map center [longitude, latitude]
         zoom: 10, // Initial zoom level
       });
@@ -27,7 +29,6 @@ const MapView = () => {
         fetchAndDisplayData(mapInstance.getCenter().lng, mapInstance.getCenter().lat, year);
       });
 
-      // Listen for changes to the map center
       mapInstance.on('moveend', () => {
         const center = mapInstance.getCenter(); // Get current center of the map
         setMapCenter([center.lng, center.lat]); // Update map center state
@@ -37,28 +38,22 @@ const MapView = () => {
       return mapInstance;
     };
 
-    // Initialize the map on component mount
     const mapInstance = initializeMap();
 
-    // Clean up the map instance when the component is unmounted
-    return () => mapInstance.remove();
-  }, []); // Only run once on component mount
+    return () => mapInstance.remove(); // Clean up the map instance when the component is unmounted
+  }, [year]); // Re-run the effect if year changes
 
-  // Function to fetch data from the backend and display on the map
-  const fetchAndDisplayData = (longitude, latitude, date) => {
-    // Create a FormData object
+  const fetchAndDisplayData = (longitude, latitude, year) => {
     const formData = new FormData();
     formData.append('longitude', longitude);
     formData.append('latitude', latitude);
-    formData.append('date', date);
+    formData.append('year', year);
 
-    // Send the FormData to the backend using axios
     axios
       .post('/neural-network-response', formData)
       .then((response) => {
         const healthData = response.data;
 
-        // Create a GeoJSON source for the fetched health data
         const geojsonSource = {
           type: 'geojson',
           data: {
@@ -76,13 +71,11 @@ const MapView = () => {
           },
         };
 
-        // Add or update the GeoJSON source
         if (map.getSource('health-data')) {
-          map.getSource('health-data').setData(geojsonSource.data); // Update existing source
+          map.getSource('health-data').setData(geojsonSource.data);
         } else {
-          map.addSource('health-data', geojsonSource); // Add new source
-          
-          // Add a heatmap layer for visualizing the health data
+          map.addSource('health-data', geojsonSource);
+
           map.addLayer({
             id: 'health-heatmap',
             type: 'heatmap',
@@ -94,51 +87,63 @@ const MapView = () => {
                 'interpolate',
                 ['linear'],
                 ['heatmap-density'],
-                0, 'rgba(0, 0, 255, 0)', // Blue for very low density
-                0.2, 'rgba(255, 165, 0, 0.6)', // Orange for medium density
-                0.4, 'rgba(255, 140, 0, 0.6)', // Darker orange for higher density
-                0.6, 'rgba(255, 69, 0, 0.6)', // Red-orange for higher density
-                1, 'rgba(255, 0, 0, 1)', // Red for high density
+                0, 'rgba(0, 0, 255, 0)',
+                0.2, 'rgba(255, 165, 0, 0.6)',
+                0.4, 'rgba(255, 140, 0, 0.6)',
+                0.6, 'rgba(255, 69, 0, 0.6)',
+                1, 'rgba(255, 0, 0, 1)',
               ],
               'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 2, 15, 20],
               'heatmap-opacity': 0.8,
             },
           });
 
-          // Add circle layer for individual points with varying sizes and colors
           map.addLayer({
             id: 'health-points',
             type: 'circle',
             source: 'health-data',
             minzoom: 5,
             paint: {
-              'circle-radius': [
-                'interpolate',
-                ['linear'],
-                ['get', 'healthScore'],
-                0, 4, // Smallest size for low score
-                100, 12, // Largest size for high score
-              ],
+              'circle-radius': ['interpolate', ['linear'], ['get', 'healthScore'], 0, 4, 100, 12],
               'circle-color': [
                 'interpolate',
                 ['linear'],
                 ['get', 'healthScore'],
-                0, 'rgba(255, 0, 0, 0.5)', // Red for low health score (semi-transparent)
-                50, 'rgba(255, 165, 0, 0.5)', // Orange for medium health score (semi-transparent)
-                100, 'rgba(0, 255, 0, 0.5)', // Green for high health score (semi-transparent)
+                0, 'rgba(255, 0, 0, 0.5)',
+                50, 'rgba(255, 165, 0, 0.5)',
+                100, 'rgba(0, 255, 0, 0.5)',
               ],
               'circle-stroke-color': [
                 'interpolate',
                 ['linear'],
                 ['get', 'healthScore'],
-                0, 'rgba(255, 0, 0, 1)', // Red for low health score (opaque)
-                50, 'rgba(255, 165, 0, 1)', // Orange for medium health score (opaque)
-                100, 'rgba(0, 255, 0, 1)', // Green for high health score (opaque)
+                0, 'rgba(255, 0, 0, 1)',
+                50, 'rgba(255, 165, 0, 1)',
+                100, 'rgba(0, 255, 0, 1)',
               ],
               'circle-stroke-width': 2,
               'circle-stroke-opacity': 1,
               'circle-opacity': 0.5,
             },
+          });
+
+          map.on('click', 'health-points', (e) => {
+            const features = map.queryRenderedFeatures(e.point, { layers: ['health-points'] });
+            if (features.length) {
+              const feature = features[0];
+              new mapboxgl.Popup()
+                .setLngLat(feature.geometry.coordinates)
+                .setHTML(`<h3>Health Score: ${feature.properties.healthScore}</h3>`)
+                .addTo(map);
+            }
+          });
+
+          map.on('mouseenter', 'health-points', () => {
+            map.getCanvas().style.cursor = 'pointer';
+          });
+
+          map.on('mouseleave', 'health-points', () => {
+            map.getCanvas().style.cursor = '';
           });
         }
       })
@@ -147,9 +152,84 @@ const MapView = () => {
       });
   };
 
+  const handleSliderChange = (event, newValue) => {
+    setYear(newValue); // Update the year state when the slider changes
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
-    // Map container where the map will be rendered
-    <div ref={mapContainerRef} style={{ width: '100%', height: '100vh' }} />
+    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', margin: 0 }}>
+      {/* Back to Top Arrow */}
+      <button
+        onClick={scrollToTop}
+        style={{
+          position: 'absolute',
+          top: '10px',
+          left: '10px',
+          zIndex: 1,
+          backgroundColor: '#fff',
+          border: 'none',
+          borderRadius: '50%',
+          padding: '10px',
+          cursor: 'pointer',
+          boxShadow: '0 2px 5px rgba(0, 0, 0, 0.2)',
+        }}
+      >
+        <ArrowUpwardIcon />
+      </button>
+
+      {/* Improved Banner in the Top Right */}
+      <div
+        className="banner"
+        style={{
+          position: 'absolute',
+          top: '10px',
+          right: '10px',
+          zIndex: 1,
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          color: '#ffffff',
+          padding: '15px 20px',
+          borderRadius: '8px',
+          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
+          textAlign: 'center',
+          maxWidth: '250px',
+        }}
+      >
+        <h1 style={{ fontSize: '30px', margin: '0 0 10px 0' }}>HealthScope</h1>
+        <p style={{ fontSize: '10px', margin: 0 }}>
+          Scroll through the timeline to see how health risk factors have changed over time.
+        </p>
+      </div>
+
+      {/* Year Slider */}
+      <div
+        className="slider-container"
+        style={{
+          position: 'absolute',
+          bottom: '20px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 1,
+        }}
+      >
+        <Slider
+          value={year}
+          onChange={handleSliderChange}
+          valueLabelDisplay="auto"
+          step={1}
+          min={2016}
+          max={2024}
+          marks
+          color="primary"
+        />
+      </div>
+
+      {/* Map Container */}
+      <div ref={mapContainerRef} className="map-container" style={{ width: '100%', height: '100%' }} />
+    </div>
   );
 };
 
