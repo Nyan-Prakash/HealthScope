@@ -45,19 +45,24 @@ const MapView = () => {
   }, [year]); // Re-run the effect if the year changes
 
   const fetchAndDisplayData = (longitude, latitude, year) => {
+    if (!map) {
+      console.error('Map instance is not initialized');
+      return;
+    }
+  
     const formData = new FormData();
     formData.append('longitude', longitude);
     formData.append('latitude', latitude);
     formData.append('year', year);
-
+  
     axios
-      .post('/neural-network-response', formData)
+      .post('/display-all-longandlat') // Ensure formData is being sent correctly
       .then((response) => {
         const healthData = response.data;
-
+  
         console.log(healthData);
-        console.log(healthData[0].Latitude);
-
+        console.log("fsdsfsdf"+healthData[0]?.Latitude); // Safely access healthData properties to avoid undefined errors
+  
         const geojsonSource = {
           type: 'geojson',
           data: {
@@ -66,94 +71,85 @@ const MapView = () => {
               type: 'Feature',
               geometry: {
                 type: 'Point',
-                coordinates: [point.longitude, point.latitude],
+                coordinates: [point.Longitude, point.Latitude],
               },
-              
+              properties: {
+                healthScore: point.Longitude,
+              },
             })),
           },
         };
-
-        if (map.getSource('health-data')) {
-          map.getSource('health-data').setData(geojsonSource.data);
-        } else {
-          map.addSource('health-data', geojsonSource);
-
-          map.addLayer({
-            id: 'health-heatmap',
-            type: 'heatmap',
-            source: 'health-data',
-            maxzoom: 15,
-            paint: {
-              'heatmap-weight': ['interpolate', ['linear'], ['get', 'healthScore'], 0, 0, 100, 1],
-              'heatmap-color': [
-                'interpolate',
-                ['linear'],
-                ['heatmap-density'],
-                0, 'rgba(0, 0, 255, 0)',
-                0.2, 'rgba(255, 165, 0, 0.6)',
-                0.4, 'rgba(255, 140, 0, 0.6)',
-                0.6, 'rgba(255, 69, 0, 0.6)',
-                1, 'rgba(255, 0, 0, 1)',
-              ],
-              'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 2, 15, 20],
-              'heatmap-opacity': 0.8,
-            },
-          });
-
-          map.addLayer({
-            id: 'health-points',
-            type: 'circle',
-            source: 'health-data',
-            minzoom: 5,
-            paint: {
-              'circle-radius': ['interpolate', ['linear'], ['get', 'healthScore'], 0, 4, 100, 12],
-              'circle-color': [
-                'interpolate',
-                ['linear'],
-                ['get', 'healthScore'],
-                0, 'rgba(255, 0, 0, 0.5)',
-                50, 'rgba(255, 165, 0, 0.5)',
-                100, 'rgba(0, 255, 0, 0.5)',
-              ],
-              'circle-stroke-color': [
-                'interpolate',
-                ['linear'],
-                ['get', 'healthScore'],
-                0, 'rgba(255, 0, 0, 1)',
-                50, 'rgba(255, 165, 0, 1)',
-                100, 'rgba(0, 255, 0, 1)',
-              ],
-              'circle-stroke-width': 2,
-              'circle-stroke-opacity': 1,
-              'circle-opacity': 0.5,
-            },
-          });
-
-          map.on('click', 'health-points', (e) => {
-            const features = map.queryRenderedFeatures(e.point, { layers: ['health-points'] });
-            if (features.length) {
-              const feature = features[0];
-              new mapboxgl.Popup()
-                .setLngLat(feature.geometry.coordinates)
-                .setHTML(`<h3>Health Score: ${feature.properties.healthScore}</h3>`)
-                .addTo(map);
-            }
-          });
-
-          map.on('mouseenter', 'health-points', () => {
-            map.getCanvas().style.cursor = 'pointer';
-          });
-
-          map.on('mouseleave', 'health-points', () => {
-            map.getCanvas().style.cursor = '';
-          });
+  
+        try {
+          const existingSource = map.getSource('health-data');
+          if (existingSource) {
+            console.log('Source exists, updating data...');
+            existingSource.setData(geojsonSource.data);
+          } else {
+            console.log('Adding new source and layers...');
+            map.addSource('health-data', geojsonSource);
+  
+            map.addLayer({
+              id: 'health-heatmap',
+              type: 'heatmap',
+              source: 'health-data',
+              maxzoom: 15,
+              paint: {
+                'heatmap-weight': ['interpolate', ['linear'], ['get', 'healthScore'], 0, 0, 100, 1],
+                'heatmap-color': [
+                  'interpolate',
+                  ['linear'],
+                  ['heatmap-density'],
+                  0, 'rgba(0, 0, 255, 0)',
+                  0.2, 'rgba(255, 165, 0, 0.6)',
+                  0.4, 'rgba(255, 140, 0, 0.6)',
+                  0.6, 'rgba(255, 69, 0, 0.6)',
+                  1, 'rgba(255, 0, 0, 1)',
+                ],
+                'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 2, 15, 20],
+                'heatmap-opacity': 0.8,
+              },
+            });
+  
+            map.addLayer({
+              id: 'health-points',
+              type: 'circle',
+              source: 'health-data',
+              minzoom: 5,
+              paint: {
+                'circle-radius': ['interpolate', ['linear'], ['get', 'healthScore'], 0, 4, 100, 12],
+                'circle-color': [
+                  'interpolate',
+                  ['linear'],
+                  ['get', 'healthScore'],
+                  0, 'rgba(255, 0, 0, 0.5)',
+                  50, 'rgba(255, 165, 0, 0.5)',
+                  100, 'rgba(0, 255, 0, 0.5)',
+                ],
+                'circle-stroke-color': [
+                  'interpolate',
+                  ['linear'],
+                  ['get', 'healthScore'],
+                  0, 'rgba(255, 0, 0, 1)',
+                  50, 'rgba(255, 165, 0, 1)',
+                  100, 'rgba(0, 255, 0, 1)',
+                ],
+                'circle-stroke-width': 2,
+                'circle-stroke-opacity': 1,
+                'circle-opacity': 0.5,
+              },
+            });
+          }
+        } catch (error) {
+          console.error('Error working with map source or layers:', error);
         }
       })
       .catch((error) => {
         console.error('Error fetching data from FastAPI:', error);
       });
   };
-
+  
+  
   const handleSliderChange = (event, newValue) => {
     setYear(newValue); // Update the year state when the slider changes
   };
