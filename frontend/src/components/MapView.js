@@ -50,9 +50,12 @@ const MapView = () => {
     formData.append('year', year);
 
     axios
-      .post('/neural-network-response', formData)
+      .post('/display-all-longandlat')
       .then((response) => {
         const healthData = response.data;
+
+        console.log(healthData);
+        console.log(healthData[0].Latitude);
 
         const geojsonSource = {
           type: 'geojson',
