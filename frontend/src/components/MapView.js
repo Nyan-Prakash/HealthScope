@@ -45,9 +45,9 @@ const MapView = () => {
   }, []); // Only run once on component mount
 
   // Function to fetch data from the backend and display on the map
-  const fetchAndDisplayData = (longitude, latitude, year) => {
+  const fetchAndDisplayData = (latitude, longitude, date) => {
     axios
-      .post('/neuralnetwork-response', { longitude, latitude, year })
+      .post('/neural-network-response', { latitude, longitude, date })
       .then((response) => {
         const healthData = response.data;
 
