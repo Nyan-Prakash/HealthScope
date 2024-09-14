@@ -53,10 +53,10 @@ const MapView = () => {
           type: 'Feature',
           geometry: {
             type: 'Point',
-            coordinates: [point.longitude, point.latitude], // Use longitude and latitude for point locations
+            coordinates: [point.Latitude, point.Longitude], // Use longitude and latitude for point locations
           },
           properties: {
-            healthScore: point.healthScore, // Use health score for styling
+            healthScore: point.Longitude, // Use health score for styling
           },
         }));
 

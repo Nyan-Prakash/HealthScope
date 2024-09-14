@@ -30,29 +30,13 @@ async def display_all_longandlat():
 
     print("Sample 2024 data:", data_2024.head())
 
-    data_2024['Geolocation'] = data_2024['Geolocation'].str.replace('POINT \(', '', regex=True).str.replace('\)', '', regex=True)
-
-    data_2024_valid = data_2024[data_2024['Geolocation'].str.contains(" ")].copy()
-
-    split_data = data_2024_valid['Geolocation'].str.split(' ', expand=True)
-
-    if split_data.shape[1] == 2:
-        data_2024_valid['Longitude'] = split_data[0]
-        data_2024_valid['Latitude'] = split_data[1]
-    else:
-        # Handle the case where split failed
-        data_2024_valid['Longitude'] = None
-        data_2024_valid['Latitude'] = None
-    
-    data_2024_filtered = data_2024_valid[['Latitude', 'Longitude']].copy()
-
-    data_2024_filtered['Latitude'] = pd.to_numeric(data_2024_filtered['Latitude'], errors='coerce')
-    data_2024_filtered['Longitude'] = pd.to_numeric(data_2024_filtered['Longitude'], errors='coerce')
+    data_2024['Latitude'] = pd.to_numeric(data_2024['Latitude'], errors='coerce')
+    data_2024['Longitude'] = pd.to_numeric(data_2024['Longitude'], errors='coerce')
 
     # Convert the filtered data to a list of dictionaries to return as JSON
-    data_2024_filtered = data_2024_filtered.dropna()
+    data_2024_filtered = data_2024.dropna(subset=['Latitude', 'Longitude']).copy()
 
-    data_2024_filtered_limited = data_2024_filtered.head(1000)
+    data_2024_filtered_limited = data_2024_filtered[['Latitude', 'Longitude']].head(80000)
 
     result = data_2024_filtered_limited.to_dict(orient='records')
 
