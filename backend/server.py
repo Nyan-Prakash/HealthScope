@@ -52,7 +52,9 @@ async def display_all_longandlat():
     # Convert the filtered data to a list of dictionaries to return as JSON
     data_2024_filtered = data_2024_filtered.dropna()
 
-    result = data_2024_filtered.to_dict(orient='records')
+    data_2024_filtered_limited = data_2024_filtered.head(1000)
+
+    result = data_2024_filtered_limited.to_dict(orient='records')
 
     print(result)
 
