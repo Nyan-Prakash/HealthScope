@@ -9,7 +9,7 @@ model = Sequential()
 model.add(Dense(10, activation='relu', input_dim=10))
 model.add(Dense(1, activation='sigmoid'))
 
-model.compile(optimizer='adam', loss = 'binary_crossentropy', metrics=['accuracy'])
+model.compile(optimizer='adam', loss = 'mean_squared_error', metrics=['mae'])
 
 model.fit(x_train_data, y_train_data, epochs=20, batch_size=10)
 
