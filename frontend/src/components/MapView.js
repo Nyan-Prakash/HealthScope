@@ -106,7 +106,7 @@ const MapView = () => {
             minzoom: 5,
             paint: {
               // Increase the size of the circle points based on health score
-              'circle-radius': ['interpolate', ['linear'], ['get', 'healthScore'], 0, 8, 100, 24],
+              'circle-radius': ['interpolate', ['linear'], ['get', 'healthScore'], 0, 15, 100, 16],
               'circle-color': [
                 'interpolate',
                 ['linear'],
