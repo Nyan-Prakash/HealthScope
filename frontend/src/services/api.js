@@ -4,7 +4,7 @@ import axios from 'axios';
 // Create an Axios instance with default configurations
 const instance = axios.create({
   baseURL: 'http://localhost:8000', // Base URL of your FastAPI backend
-  timeout: 10000, // Timeout set to 10 seconds
+  timeout: 60000, // Timeout set to 10 seconds
 });
 
 // Optional: Add a request interceptor (if you need to add headers like authorization)
