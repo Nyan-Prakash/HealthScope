@@ -19,9 +19,13 @@ const MapView = () => {
   const [selectedData, setSelectedData] = useState(null);
   const [GraphData, setGraphData] = useState(null);
 
+  const [xData, setXData] = useState([]);
+  const [yData, setYData] = useState([]);
+
   useEffect(() => {
     // Initialize the map
     const initializeMap = () => {
+      closeSidePanel(); // Close the side panel when the map is initialized
       const mapInstance = new mapboxgl.Map({
         container: mapContainerRef.current, // Specify the container ID
         style: 'mapbox://styles/mapbox/streets-v11', // Mapbox style URL
@@ -149,7 +153,7 @@ const MapView = () => {
             formData.append('Longitude', coordinates[0]);
             formData.append('Latitude', coordinates[1]);
             formData.append('year', year);
-          
+            
             // Round the health score to the nearest integer
             healthScore = Math.round(healthScore);
           
@@ -159,18 +163,35 @@ const MapView = () => {
             while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
               coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
             }
-            axios.post('/graph-health-score', formData)
-            .then((response) => {
-              // Map API response data to your custom labels
-              const responseData = response.data[0];
-              
+            if(year < 2024)
+            {
+              axios.post('/graph-health-score', formData)
+  .then((response) => {
+    const responseData = response.data;
 
-          
-              setGraphData(responseData); // Set selected data with custom labels
-            })
-            .catch((error) => {
-              console.error('Error fetching additional data:', error);
-            });
+    // Create two variables for the x and y values
+    const xValues = responseData.years || [];  // X values for the line chart (years)
+    const yValues = responseData.health_scores || [];  // Y values for the line chart (health scores)
+
+    setXData(xValues);
+    setYData(yValues);
+
+
+    console.log(xValues);
+    // Create a new object to map the response data
+    const mappedData = {
+      years: xValues,  // X values
+      health_scores: yValues,  // Y values
+    };
+
+    // Set the mapped data to be used in the SidePanel
+    setGraphData(mappedData);
+  })
+  .catch((error) => {
+    console.error('Error fetching graph data:', error);
+  });
+
+
             // Make the asynchronous request to get additional data
             axios.post('/health-information', formData)
   .then((response) => {
@@ -198,6 +219,12 @@ const MapView = () => {
   .catch((error) => {
     console.error('Error fetching additional data:', error);
   });
+            } else {
+              const popup = new mapboxgl.Popup({ closeOnClick: true })
+              .setLngLat(coordinates) // Set the popup at the clicked point
+              .setHTML(`<strong>Health Score</strong><p>${healthScore}</p>`)
+              .addTo(mapInstance);
+          }            
 
           });
           
@@ -237,7 +264,7 @@ const MapView = () => {
   return (
     <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', margin: 0 }}>
       {/* Zoom In and Out Buttons */}
-      <SidePanel isOpen={sidePanelOpen} onClose={closeSidePanel} data={selectedData} graphDatas={GraphData} />
+      <SidePanel isOpen={sidePanelOpen} onClose={closeSidePanel} data={selectedData} graphDatas={GraphData} xset={xData} yset={yData} />
 
       <div style={{ position: 'absolute', top: '80px', left: '10px', zIndex: 1 }}>
         <button
