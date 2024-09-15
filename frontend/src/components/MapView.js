@@ -60,7 +60,7 @@ const MapView = () => {
             coordinates: [point.Latitude, point.Longitude], // Use longitude and latitude for point locations
           },
           properties: {
-            healthScore: point.Other_Health_Score, // Use health score for styling
+            healthScore: point.Normalized_Health_Score, // Use health score for styling
           },
         }));
 

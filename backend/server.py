@@ -32,12 +32,12 @@ async def display_all_longandlat(year: int=Form()):
 
     data_2024['Latitude'] = pd.to_numeric(data_2024['Latitude'], errors='coerce')
     data_2024['Longitude'] = pd.to_numeric(data_2024['Longitude'], errors='coerce')
-    data_2024['Other_Health_Score'] = pd.to_numeric(data_2024['Other_Health_Score'], errors='coerce')
+    data_2024['Normalized_Health_Score'] = pd.to_numeric(data_2024['Normalized_Health_Score'], errors='coerce')
 
     # Convert the filtered data to a list of dictionaries to return as JSON
-    data_2024_filtered = data_2024.dropna(subset=['Latitude', 'Longitude', 'Other_Health_Score']).copy()
+    data_2024_filtered = data_2024.dropna(subset=['Latitude', 'Longitude', 'Normalized_Health_Score']).copy()
 
-    data_2024_filtered_limited = data_2024_filtered[['Latitude', 'Longitude', 'Other_Health_Score']].head(80000)
+    data_2024_filtered_limited = data_2024_filtered[['Latitude', 'Longitude', 'Normalized_Health_Score']].head(80000)
 
     result = data_2024_filtered_limited.to_dict(orient='records')
 
