@@ -12,9 +12,8 @@ const MapView = () => {
   const mapContainerRef = useRef(null); // Ref to store the map container DOM node
   const [year, setYear] = useState(2024); // State to store the year
   const [map, setMap] = useState(null); // State to store the map instance
-
-  const [long, setLong] = useState(39.29);
-  const [lat, setLat] = useState(-76.61);
+  const [center, setCenter] = useState([-76.61, 39.29]); // State to store map center (lng, lat)
+  const [zoom, setZoom] = useState(10); // State to store map zoom level
 
   useEffect(() => {
     // Initialize the map
@@ -22,8 +21,8 @@ const MapView = () => {
       const mapInstance = new mapboxgl.Map({
         container: mapContainerRef.current, // Specify the container ID
         style: 'mapbox://styles/mapbox/streets-v11', // Mapbox style URL
-        center: [lat, long],
-        zoom: 10, // Initial zoom level
+        center: center, // Use stored center
+        zoom: zoom, // Use stored zoom level
       });
 
       mapInstance.on('load', () => {
@@ -32,8 +31,9 @@ const MapView = () => {
       });
 
       mapInstance.on('moveend', () => {
-         // setLong(mapInstance.getCenter().Longitude);
-        //  setLat(mapInstance.getCenter().Longitude);
+        // Update center and zoom state when map movement ends
+        setCenter([mapInstance.getCenter().lng, mapInstance.getCenter().lat]);
+        setZoom(mapInstance.getZoom());
       });
 
       return mapInstance;
@@ -61,7 +61,7 @@ const MapView = () => {
           type: 'Feature',
           geometry: {
             type: 'Point',
-            coordinates: [point.Latitude, point.Longitude], // Use longitude and latitude for point locations
+            coordinates: [point.Longitude, point.Latitude], // Use longitude and latitude for point locations
           },
           properties: {
             healthScore: point.Normalized_Health_Score, // Use health score for styling
@@ -94,12 +94,9 @@ const MapView = () => {
               'heatmap-color': [
                 'interpolate',
                 ['linear'],
-                ['heatmap-density'],
-                0, 'rgba(0, 0, 255, 0)',
-                0.2, 'rgba(255, 165, 0, 0.6)',
-                0.4, 'rgba(255, 140, 0, 0.6)',
-                0.6, 'rgba(255, 69, 0, 0.6)',
-                1, 'rgba(255, 0, 0, 1)',
+                ['get', 'healthScore'],
+                0, 'rgba(255, 255, 255, 0)', // Transparent at health score 0
+                100, 'rgba(255, 0, 0, 1)', // Fully red at health score 100
               ],
               'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 2, 15, 20],
               'heatmap-opacity': 0.8,
@@ -119,17 +116,15 @@ const MapView = () => {
                 'interpolate',
                 ['linear'],
                 ['get', 'healthScore'],
-                0, 'rgba(255, 0, 0, 0.5)',
-                50, 'rgba(255, 165, 0, 0.5)',
-                100, 'rgba(0, 255, 0, 0.5)',
+                0, 'rgba(255, 255, 255, 0)', // Transparent at health score 0
+                100, 'rgba(255, 0, 0, 0.5)', // Semi-transparent red at health score 100
               ],
               'circle-stroke-color': [
                 'interpolate',
                 ['linear'],
                 ['get', 'healthScore'],
-                0, 'rgba(255, 0, 0, 1)',
-                50, 'rgba(255, 165, 0, 1)',
-                100, 'rgba(0, 255, 0, 1)',
+                0, 'rgba(255, 255, 255, 0)', // Transparent at health score 0
+                100, 'rgba(255, 0, 0, 1)', // Fully red at health score 100
               ],
               'circle-stroke-width': 2,
               'circle-opacity': 0.5,
