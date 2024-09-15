@@ -46,14 +46,10 @@ const MapView = () => {
           type: 'Feature',
           geometry: {
             type: 'Point',
-<<<<<<< HEAD
             coordinates: [point.Latitude, point.Longitude], // Use longitude and latitude for point locations
-=======
-            coordinates: [point.longitude, point.latitude], // Use longitude and latitude for point locations
->>>>>>> 0e6d2c183407679c9af3b4c90b2f7d1a668c6e58
           },
           properties: {
-            healthScore: point.healthScore, // Use health score for styling
+            healthScore: point.Normalized_Health_Score, // Use health score for styling
           },
         }));
         if (mapInstance.getSource('health-data')) {
