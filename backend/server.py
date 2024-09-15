@@ -135,8 +135,10 @@ async def graph_health_score(Latitude: float=Form(), Longitude: float=Form(), ye
     data = pd.read_csv(file_path)
     matching_rows = data[(data['Latitude'].round(5) == round(Longitude, 5)) & (data['Longitude'].round(5) == round(Latitude, 5))]
     if not matching_rows.empty:
-        years = matching_rows['Year'].values
-        health_scores = matching_rows['Normalized_Health_Score'].values
-        return years, health_scores
+        years = matching_rows['Year'].tolist()
+        print(years)
+        health_scores = matching_rows['Normalized_Health_Score'].tolist()
+        print(health_scores)
+        return {"years": years, "health_scores": health_scores}
     else:
-        return pd.DataFrame({'Year': [], 'Normalized_Health_Score': []})
+        return {"years": [], "health_scores": []}
