@@ -13,19 +13,27 @@ const MapView = () => {
   const [year, setYear] = useState(2024); // State to store the year
   const [map, setMap] = useState(null); // State to store the map instance
 
+  const [long, setLong] = useState(39.29);
+  const [lat, setLat] = useState(-76.61);
+
   useEffect(() => {
     // Initialize the map
     const initializeMap = () => {
       const mapInstance = new mapboxgl.Map({
         container: mapContainerRef.current, // Specify the container ID
         style: 'mapbox://styles/mapbox/streets-v11', // Mapbox style URL
-        center: [-122.4194, 37.7749], // Initial map center [longitude, latitude]
+        center: [lat, long],
         zoom: 10, // Initial zoom level
       });
 
       mapInstance.on('load', () => {
         setMap(mapInstance); // Store the map instance in state
         fetchAndDisplayData(mapInstance, year); // Fetch data when the map loads
+      });
+
+      mapInstance.on('moveend', () => {
+         // setLong(mapInstance.getCenter().Longitude);
+        //  setLat(mapInstance.getCenter().Longitude);
       });
 
       return mapInstance;
@@ -56,7 +64,7 @@ const MapView = () => {
             coordinates: [point.Latitude, point.Longitude], // Use longitude and latitude for point locations
           },
           properties: {
-            healthScore: point.Longitude, // Use health score for styling
+            healthScore: point.Normalized_Health_Score, // Use health score for styling
           },
         }));
 
