@@ -4,17 +4,19 @@ import axios from '../services/api'; // Import your configured Axios instance
 import 'mapbox-gl/dist/mapbox-gl.css'; // Import the Mapbox CSS
 import Slider from '@mui/material/Slider'; // Import Material UI Slider component
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'; // Import Material UI arrow icon
+import SidePanel from './Sidepanel.js';
 
 // Set your Mapbox access token
 mapboxgl.accessToken = 'pk.eyJ1Ijoid29sZm1hbjUiLCJhIjoiY20xMWl3aW5iMDNzaTJyb2lhMWI5MzBnaSJ9.eDVXFDM_gOY1J4k_YHJMsg'; // Replace with your Mapbox access token
 
 const MapView = () => {
-  const mapContainerRef = useRef(null); // Ref to store the map container DOM node
-  const [year, setYear] = useState(2024); // State to store the year
-  const [map, setMap] = useState(null); // State to store the map instance
-  const [center, setCenter] = useState([-76.61, 39.29]); // State to store map center (lng, lat)
-  const [zoom, setZoom] = useState(10); // State to store map zoom level
-
+  const mapContainerRef = useRef(null);
+  const [year, setYear] = useState(2024);
+  const [map, setMap] = useState(null);
+  const [center, setCenter] = useState([-76.61, 39.29]);
+  const [zoom, setZoom] = useState(10);
+  const [sidePanelOpen, setSidePanelOpen] = useState(false);
+  const [selectedData, setSelectedData] = useState(null);
 
   useEffect(() => {
     // Initialize the map
@@ -156,13 +158,9 @@ const MapView = () => {
           
             // Make the asynchronous request to get additional data
             axios.post('/display-all-longandlat', formData).then((response) => {
-              const arth = response.data.arth; // Assuming 'arth' is part of the response data
-          
-              // Create a popup with the rounded health score and the additional data
-              new mapboxgl.Popup()
-                .setLngLat(coordinates)
-                .setHTML(`<strong>Health Score:</strong> ${healthScore}, <strong>Arth:</strong> ${arth}`)
-                .addTo(mapInstance);
+              const arth = response.data.arth;
+              setSelectedData({ healthScore, arth }); // Set selected data
+              setSidePanelOpen(true); // Open side panel
             }).catch((error) => {
               console.error('Error fetching additional data:', error);
             });
@@ -185,7 +183,9 @@ const MapView = () => {
         console.error('Error fetching data from neural-network-response:', error);
       });
   };
-  
+  const closeSidePanel = () => {
+    setSidePanelOpen(false);
+  };
 
   const handleSliderChange = (event, newValue) => {
     setYear(newValue); // Update the year state when the slider changes
@@ -202,6 +202,8 @@ const MapView = () => {
   return (
     <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', margin: 0 }}>
       {/* Zoom In and Out Buttons */}
+      <SidePanel isOpen={sidePanelOpen} onClose={closeSidePanel} data={selectedData} />
+
       <div style={{ position: 'absolute', top: '80px', left: '10px', zIndex: 1 }}>
         <button
           onClick={zoomIn}
