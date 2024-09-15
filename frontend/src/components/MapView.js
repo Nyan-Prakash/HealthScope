@@ -80,12 +80,12 @@ const MapView = () => {
         } else {
 
           const colorStops =
-          year < 2024
+          year < 2025
             ? [
               'interpolate',
               ['linear'],
               ['get', 'healthScore'],
-              0, 'rgba(0, 256, 0, 1)', // Blue for healthScore 0
+              0, 'rgba(0, 255, 0, 1)', // Blue for healthScore 0
               30, 'rgba(0, 255, 0, 1)',
               60, 'rgba(255, 0, 0, 1)', // Yellow for healthScore 50
               100, 'rgba(255, 0, 0, 1)',] // Red for healthScore 100

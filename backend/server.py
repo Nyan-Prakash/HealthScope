@@ -56,8 +56,8 @@ async def display_all_longandlat(year: int=Form()):
 
         data_2024_filtered = data_2024.dropna(subset=['Latitude', 'Longitude']).copy()
 
-        latitudes = np.deg2rad(data_2024_filtered['Longitude'].values)
-        longitudes = np.deg2rad(data_2024_filtered['Latitude'].values)
+        latitudes = np.deg2rad(data_2024_filtered['Latitude'].values)
+        longitudes = np.deg2rad(data_2024_filtered['Longitude'].values)
 
         print(len(latitudes))
         print(len(longitudes))
@@ -135,7 +135,7 @@ async def graph_health_score(Latitude: float=Form(), Longitude: float=Form(), ye
     data = pd.read_csv(file_path)
     matching_rows = data[(data['Latitude'].round(5) == round(Longitude, 5)) & (data['Longitude'].round(5) == round(Latitude, 5))]
     if not matching_rows.empty:
-        years = matching_rows['Year'].tolist()
+        years = (matching_rows['Year'] % 100).tolist()
         print(years)
         health_scores = matching_rows['Normalized_Health_Score'].tolist()
         print(health_scores)
