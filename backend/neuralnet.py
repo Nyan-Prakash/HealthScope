@@ -7,7 +7,7 @@ from tensorflow.keras import layers, models
 import matplotlib.pyplot as plt
 
 data = pd.read_csv('spreadsheets/2016_2024_Data.csv')
-data = data.dropna(subset=['Latitude', 'Longitude', 'Year', 'Normalized_Health_Score'])
+data = data.dropna(subset=['Latitude', 'Longitude', 'Year', 'Other_Health_Score'])
 
 data['latitude_rad'] = np.deg2rad(data['Latitude'])
 data['longitude_rad'] = np.deg2rad(data['Longitude'])
@@ -29,7 +29,7 @@ feature_columns = [
 ]
 
 X = data[feature_columns].values
-y = data['Normalized_Health_Score'].values
+y = data['Other_Health_Score'].values
 
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
@@ -50,6 +50,10 @@ def build_geospatial_model(input_dim):
     model.add(layers.Dense(32, activation='relu'))
     model.add(layers.BatchNormalization())
     model.add(layers.Dropout(0.3))
+
+    model.add(layers.Dense(16, activation='relu'))
+    model.add(layers.BatchNormalization())
+    model.add(layers.Dropout(0.3))
     
     model.add(layers.Dense(1, activation='linear'))
     
@@ -67,14 +71,14 @@ model.summary()
 
 early_stop = tf.keras.callbacks.EarlyStopping(
     monitor='val_loss',
-    patience=20,
+    patience=50,
     restore_best_weights=True
 )
 
 history = model.fit(
     X_train, y_train,
     validation_split=0.2,
-    epochs=200,
+    epochs=400,
     batch_size=1024,
     callbacks=[early_stop],
     verbose=1
@@ -83,30 +87,10 @@ history = model.fit(
 test_loss, test_mae = model.evaluate(X_test, y_test, verbose=2)
 print(f'Test MAE: {test_mae}')
 
-plt.figure(figsize=(14,6))
-
-plt.subplot(1, 2, 1)
-plt.plot(history.history['loss'], label='Train Loss')
-plt.plot(history.history['val_loss'], label='Val Loss')
-plt.title('Model Loss')
-plt.ylabel('MSE Loss')
-plt.xlabel('Epoch')
-plt.legend(loc='upper right')
-
-plt.subplot(1, 2, 2)
-plt.plot(history.history['mae'], label='Train MAE')
-plt.plot(history.history['val_mae'], label='Val MAE')
-plt.title('Model MAE')
-plt.ylabel('MAE')
-plt.xlabel('Epoch')
-plt.legend(loc='upper right')
-
-plt.show()
-
 # 9. Make predictions
-predictions = model.predict(X_test[:5])
+predictions = model.predict(X_test)
 print("Predicted Health Scores:", predictions.flatten())
-print("Actual Health Scores:", y_test[:5])
+print("Actual Health Scores:", y_test)
 # import numpy as np
 # from keras.models import Sequential
 # from keras.layers import Dense
