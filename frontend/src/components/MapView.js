@@ -157,13 +157,32 @@ const MapView = () => {
             }
           
             // Make the asynchronous request to get additional data
-            axios.post('/display-all-longandlat', formData).then((response) => {
-              const arth = response.data.arth;
-              setSelectedData({ healthScore, arth }); // Set selected data
-              setSidePanelOpen(true); // Open side panel
-            }).catch((error) => {
-              console.error('Error fetching additional data:', error);
-            });
+            axios.post('/health-information', formData)
+  .then((response) => {
+    // Map API response data to your custom labels
+    const responseData = response.data[0]; 
+
+    // Map the response data to your custom labels
+    const customData = {
+      'Health Score': healthScore, 
+      'Diabetes': responseData.DIABETES_CrudePrev, 
+      'Cancer': responseData.CANCER_CrudePrev,
+      'Obesity': responseData.OBESITY_CrudePrev,
+      'Cholesterol': responseData.HIGHCHOL_CrudePrev,
+      'Stroke': responseData.STROKE_CrudePrev,
+      'Sleep Quality': responseData.SLEEP_CrudePrev,
+      'Blood Pressure': responseData.BPMED_CrudePrev
+      // Add more custom labels and corresponding data here
+    };
+    console.log(responseData.ARTHRITIS_CrudePrev); // Debugging: log the custom data
+
+    setSelectedData(customData); // Set selected data with custom labels
+    setSidePanelOpen(true); // Open side panel
+  })
+  .catch((error) => {
+    console.error('Error fetching additional data:', error);
+  });
+
           });
           
 
