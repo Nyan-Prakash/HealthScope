@@ -236,6 +236,27 @@ const MapView = () => {
           color="primary"
         />
       </div>
+      <div
+         className="banner"
+         style={{
+           position: 'absolute',
+           top: '10px',
+           right: '10px',
+           zIndex: 1,
+           backgroundColor: 'rgba(0, 0, 0, 0.7)',
+           color: '#ffffff',
+           padding: '15px 20px',
+           borderRadius: '8px',
+           boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
+           textAlign: 'center',
+           maxWidth: '250px',
+         }}
+       >
+         <h1 style={{ fontSize: '30px', margin: '0 0 10px 0' }}>HealthScope</h1>
+         <p style={{ fontSize: '10px', margin: 0 }}>
+           Scroll through the timeline to see how health risk factors have changed over time.
+         </p>
+       </div>
       {/* Map Container */}
       <div ref={mapContainerRef} className="map-container" style={{ width: '100%', height: '100%' }} />
     </div>
