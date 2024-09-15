@@ -129,7 +129,7 @@ async def health_information(Latitude: float=Form(), Longitude: float=Form(), ye
         return None
     
 @app.post("/graph-health-score")
-async def graph_health_score(Latitude: float=Form(), Longitude: float=Form()):
+async def graph_health_score(Latitude: float=Form(), Longitude: float=Form(), year: int=Form()):
     file_path = "spreadsheets/2016_2024_Data.csv"
 
     data = pd.read_csv(file_path)

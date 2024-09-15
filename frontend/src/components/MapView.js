@@ -78,19 +78,21 @@ const MapView = () => {
           const colorStops =
           year < 2024
             ? [
-                ['get', 'healthScore'],
-                0, 'rgba(0, 256, 0, 1)', // Blue for healthScore 0
-                30, 'rgba(0, 255, 0, 1)',
-                60, 'rgba(255, 0, 0, 1)', // Yellow for healthScore 50
-                100, 'rgba(255, 0, 0, 1)', // Red for healthScore 100
-              ]
+              'interpolate',
+              ['linear'],
+              ['get', 'healthScore'],
+              0, 'rgba(0, 256, 0, 1)', // Blue for healthScore 0
+              30, 'rgba(0, 255, 0, 1)',
+              60, 'rgba(255, 0, 0, 1)', // Yellow for healthScore 50
+              100, 'rgba(255, 0, 0, 1)',] // Red for healthScore 100
             : [
-                ['get', 'healthScore'],
-                0, 'rgba(0, 256, 0, 1)', // Blue for healthScore 0
-                35, 'rgba(0, 255, 0, 1)',
-                42, 'rgba(255, 0, 0, 1)', // Yellow for healthScore 50
-                100, 'rgba(255, 0, 0, 1)', // Red for healthScore 100
-              ];
+              'interpolate',
+              ['linear'],
+              ['get', 'healthScore'],
+              0, 'rgba(0, 256, 0, 1)', // Blue for healthScore 0
+              35, 'rgba(0, 255, 0, 1)',
+              42, 'rgba(255, 0, 0, 1)', // Yellow for healthScore 50
+              100, 'rgba(255, 0, 0, 1)',]; // Red for healthScore 100
           // Add GeoJSON source
           mapInstance.addSource('health-data', {
             type: 'geojson',
@@ -157,7 +159,7 @@ const MapView = () => {
             while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
               coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
             }
-            axios.post('/health-graph-score', formData)
+            axios.post('/graph-health-score', formData)
             .then((response) => {
               // Map API response data to your custom labels
               const responseData = response.data[0];
@@ -174,7 +176,7 @@ const MapView = () => {
   .then((response) => {
     // Map API response data to your custom labels
     const responseData = response.data[0];
-    setGraphData(responseData);
+    setSelectedData(responseData);
     
 
     // Map the response data to your custom labels
@@ -319,7 +321,7 @@ const MapView = () => {
           valueLabelDisplay="auto"
           step={1}
           min={2016}
-          max={2024}
+          max={2029}
           marks
           color="primary"
         />
