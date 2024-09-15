@@ -15,6 +15,7 @@ const MapView = () => {
   const [center, setCenter] = useState([-76.61, 39.29]); // State to store map center (lng, lat)
   const [zoom, setZoom] = useState(10); // State to store map zoom level
 
+
   useEffect(() => {
     // Initialize the map
     const initializeMap = () => {
@@ -135,26 +136,38 @@ const MapView = () => {
   
           // Add click event listener for the health-points layer
           // Add click event listener for the health-points layer
-mapInstance.on('click', 'health-points', (e) => {
-  const coordinates = e.features[0].geometry.coordinates.slice();
-  let healthScore = e.features[0].properties.healthScore;
-
-  // Round the health score to the nearest integer
-  healthScore = Math.round(healthScore);
-
-  // Ensure that if the map is zoomed out such that multiple
-  // copies of the feature are visible, the popup appears
-  // over the copy being pointed to.
-  while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-    coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-  }
-
-  // Create a popup
-  new mapboxgl.Popup()
-    .setLngLat(coordinates)
-    .setHTML(`<strong>Health Score:</strong> ${healthScore}`)
-    .addTo(mapInstance);
-});
+          mapInstance.on('click', 'health-points', (e) => {
+            const coordinates = e.features[0].geometry.coordinates.slice();
+            let healthScore = e.features[0].properties.healthScore;
+            const formData = new FormData();
+            formData.append('Longitude', coordinates[0]);
+            formData.append('Latitude', coordinates[1]);
+            formData.append('year', year);
+          
+            // Round the health score to the nearest integer
+            healthScore = Math.round(healthScore);
+          
+            // Ensure that if the map is zoomed out such that multiple
+            // copies of the feature are visible, the popup appears
+            // over the copy being pointed to.
+            while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+              coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+            }
+          
+            // Make the asynchronous request to get additional data
+            axios.post('/display-all-longandlat', formData).then((response) => {
+              const arth = response.data.arth; // Assuming 'arth' is part of the response data
+          
+              // Create a popup with the rounded health score and the additional data
+              new mapboxgl.Popup()
+                .setLngLat(coordinates)
+                .setHTML(`<strong>Health Score:</strong> ${healthScore}, <strong>Arth:</strong> ${arth}`)
+                .addTo(mapInstance);
+            }).catch((error) => {
+              console.error('Error fetching additional data:', error);
+            });
+          });
+          
 
   
           // Change the cursor to a pointer when the mouse is over the health-points layer
