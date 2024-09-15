@@ -23,6 +23,7 @@ async def neural_network_response(latitude: float=Form(), longitude: float=Form(
 
 @app.post("/display-all-longandlat")
 async def display_all_longandlat(year: int=Form()):
+    print(year)
     file_path = "spreadsheets/2016_2024_Data.csv"
 
     data = pd.read_csv(file_path)
@@ -41,20 +42,23 @@ async def display_all_longandlat(year: int=Form()):
 
     result = data_2024_filtered_limited.to_dict(orient='records')
 
-    print(result)
+    #print(result)
 
     return result
 
 @app.post("/health-information")
 async def health_information(Latitude: float=Form(), Longitude: float=Form(), year: int=Form()):
+    print(Longitude, Latitude, year)
     file_path = "spreadsheets/2016_2024_Data.csv"
 
     data = pd.read_csv(file_path)
     data_year = data[data['Year'] == year]
 
-    match = data_year[(data_year['Latitude'] == Latitude) & (data_year['Longitude'] == Longitude)]
+    match = data_year[(data_year['Latitude'].round(5) == round(Longitude, 5)) & (data_year['Longitude'].round(5) == round(Latitude, 5))]
 
     if not match.empty:
-        return match.drop(columns=['Year', 'Latitude', 'Longitude']).to_dict(orient='records')
+        result = match.drop(columns=['Year', 'Latitude', 'Longitude']).to_dict(orient='records')
+        print(result)
+        return result
     else:
         return None

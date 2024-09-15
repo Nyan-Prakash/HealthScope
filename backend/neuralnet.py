@@ -7,7 +7,7 @@ from tensorflow.keras import layers, models
 import matplotlib.pyplot as plt
 
 data = pd.read_csv('spreadsheets/2016_2024_Data.csv')
-data = data.dropna(subset=['Latitude', 'Longitude', 'Year', 'Other_Health_Score'])
+data = data.dropna(subset=['Latitude', 'Longitude', 'Year', 'Normalized_Health_Score'])
 
 data['latitude_rad'] = np.deg2rad(data['Latitude'])
 data['longitude_rad'] = np.deg2rad(data['Longitude'])
@@ -17,7 +17,7 @@ data['latitude_cos'] = np.cos(data['latitude_rad'])
 data['longitude_sin'] = np.sin(data['longitude_rad'])
 data['longitude_cos'] = np.cos(data['longitude_rad'])
 
-cycle = 10
+cycle = 5
 data['Year_sin'] = np.sin(2 * np.pi * data['Year'] / cycle)
 data['Year_cos'] = np.cos(2 * np.pi * data['Year'] / cycle)
 
@@ -29,7 +29,7 @@ feature_columns = [
 ]
 
 X = data[feature_columns].values
-y = data['Other_Health_Score'].values
+y = data['Normalized_Health_Score'].values
 
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42

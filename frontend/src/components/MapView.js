@@ -155,7 +155,7 @@ const MapView = () => {
             }
           
             // Make the asynchronous request to get additional data
-            axios.post('/display-all-longandlat', formData).then((response) => {
+            axios.post('/health-information', formData).then((response) => {
               const arth = response.data.arth; // Assuming 'arth' is part of the response data
           
               // Create a popup with the rounded health score and the additional data
