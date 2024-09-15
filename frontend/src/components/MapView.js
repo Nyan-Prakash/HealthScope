@@ -73,6 +73,23 @@ const MapView = () => {
             features: healthDataMap,
           });
         } else {
+
+          const colorStops =
+          year < 2024
+            ? [
+                ['get', 'healthScore'],
+                0, 'rgba(0, 256, 0, 1)', // Blue for healthScore 0
+                30, 'rgba(0, 255, 0, 1)',
+                60, 'rgba(255, 0, 0, 1)', // Yellow for healthScore 50
+                100, 'rgba(255, 0, 0, 1)', // Red for healthScore 100
+              ]
+            : [
+                ['get', 'healthScore'],
+                0, 'rgba(0, 256, 0, 1)', // Blue for healthScore 0
+                35, 'rgba(0, 255, 0, 1)',
+                42, 'rgba(255, 0, 0, 1)', // Yellow for healthScore 50
+                100, 'rgba(255, 0, 0, 1)', // Red for healthScore 100
+              ];
           // Add GeoJSON source
           mapInstance.addSource('health-data', {
             type: 'geojson',
@@ -113,24 +130,8 @@ const MapView = () => {
             paint: {
               // Increase the size of the circle points based on health score
               'circle-radius': ['interpolate', ['linear'], ['get', 'healthScore'], 0, 15, 100, 16],
-              'circle-color': [
-                'interpolate',
-                ['linear'],
-                ['get', 'healthScore'],
-                0, 'rgba(0, 256, 0, 1)', // Blue for healthScore 0
-                30, 'rgba(0, 255, 0, 1)',
-                60, 'rgba(255, 0, 0, 1)', // Yellow for healthScore 50
-                100, 'rgba(255, 0, 0, 1)', // Red for healthScore 100
-              ],
-              'circle-stroke-color': [
-                'interpolate',
-                ['linear'],
-                ['get', 'healthScore'],
-                0, 'rgba(0, 256, 0, 1)', // Blue for healthScore 0
-                30, 'rgba(0, 255, 0, 1)',
-                60, 'rgba(255, 0, 0, 1)', // Yellow for healthScore 50
-                100, 'rgba(255, 0, 0, 1)', // Red for healthScore 100
-              ],
+              'circle-color': colorStops,
+              'circle-stroke-color': colorStops,
               'circle-stroke-width': 2,
               'circle-opacity': 0.5,
             },
