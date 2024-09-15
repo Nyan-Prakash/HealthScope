@@ -57,8 +57,8 @@ async def display_all_longandlat(year: int=Form()):
 
         data_2024_filtered = data_2024.dropna(subset=['Latitude', 'Longitude']).copy()
 
-        latitudes = np.deg2rad(data_2024_filtered['Latitude'].values)
-        longitudes = np.deg2rad(data_2024_filtered['Longitude'].values)
+        latitudes = np.deg2rad(data_2024_filtered['Longitude'].values)
+        longitudes = np.deg2rad(data_2024_filtered['Latitude'].values)
 
         print(len(latitudes))
         print(len(longitudes))
@@ -116,9 +116,11 @@ async def health_information(Latitude: float=Form(), Longitude: float=Form(), ye
     file_path = "spreadsheets/2016_2024_Data.csv"
 
     data = pd.read_csv(file_path)
+
     data_year = data[data['Year'] == year]
 
     match = data_year[(data_year['Latitude'].round(5) == round(Longitude, 5)) & (data_year['Longitude'].round(5) == round(Latitude, 5))]
+
 
     if not match.empty:
         result = match.drop(columns=['Year', 'Latitude', 'Longitude']).to_dict(orient='records')
@@ -126,3 +128,16 @@ async def health_information(Latitude: float=Form(), Longitude: float=Form(), ye
         return result
     else:
         return None
+    
+@app.post("/graph-health-score")
+async def graph_health_score(Latitude: float=Form(), Longitude: float=Form()):
+    file_path = "spreadsheets/2016_2024_Data.csv"
+
+    data = pd.read_csv(file_path)
+    matching_rows = data[(data['Latitude'].round(5) == round(Longitude, 5)) & (data['Longitude'].round(5) == round(Latitude, 5))]
+    if not matching_rows.empty:
+        years = matching_rows['Year'].values
+        health_scores = matching_rows['Normalized_Health_Score'].values
+        return years, health_scores
+    else:
+        return pd.DataFrame({'Year': [], 'Normalized_Health_Score': []})
