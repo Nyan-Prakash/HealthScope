@@ -63,7 +63,7 @@ const HowItWorks = () => {
         <div className="steps">
           <div className="step">
             <h3>Step 1</h3>
-            <p>Enter your location or select a region on the interactive map.</p>
+            <p>Select a region on the interactive map.</p>
           </div>
           <div className="step">
             <h3>Step 2</h3>
@@ -77,11 +77,7 @@ const HowItWorks = () => {
       </section>
 
       {/* Back to Home Button */}
-      <div className="button-container">
-        <Link to="/" className="button">
-          Go Back Home
-        </Link>
-      </div>
+
     </div>
   );
 };
