@@ -89,10 +89,15 @@ const MapView = () => {
               'interpolate',
               ['linear'],
               ['get', 'healthScore'],
-              0, 'rgba(0, 256, 0, 1)', // Blue for healthScore 0
-              35, 'rgba(0, 255, 0, 1)',
-              42, 'rgba(255, 0, 0, 1)', // Yellow for healthScore 50
-              100, 'rgba(255, 0, 0, 1)',]; // Red for healthScore 100
+              36, 'rgba(0, 0, 255, 1)', // Blue
+              37, 'rgba(0, 128, 0, 1)', // Dark Green
+              38, 'rgba(0, 255, 0, 1)', // Green
+              39, 'rgba(128, 255, 0, 1)', // Light Green
+              40, 'rgba(255, 255, 0, 1)', // Yellow
+              41, 'rgba(255, 128, 0, 1)', // Orange
+              42, 'rgba(255, 0, 0, 1)', // Red
+              // Adjust based on minScore and maxScore if necessary
+            ]; // Red for healthScore 100
           // Add GeoJSON source
           mapInstance.addSource('health-data', {
             type: 'geojson',
