@@ -79,31 +79,33 @@ const MapView = () => {
             },
           });
           // Add heatmap layer
+          // Add a circle layer for points
+
           mapInstance.addLayer({
             id: 'health-heatmap',
             type: 'heatmap',
             source: 'health-data',
-            maxzoom: 15,
             paint: {
               'heatmap-weight': ['interpolate', ['linear'], ['get', 'healthScore'], 0, 0, 100, 1],
               'heatmap-color': [
                 'interpolate',
                 ['linear'],
-                ['get', 'healthScore'],
-                0, 'rgba(0, 0, 255, 1)', // Blue for healthScore 0
-                50, 'rgba(255, 255, 0, 1)', // Yellow for healthScore 50
-                100, 'rgba(255, 0, 0, 1)', // Red for healthScore 100
+                ['heatmap-density'],
+                0, 'rgba(0, 0, 255, 0)', // Blue for very low density
+                0.2, 'rgba(255, 165, 0, 0.6)', // Orange for medium density
+                0.4, 'rgba(255, 140, 0, 0.6)', // Darker orange for higher density
+                0.6, 'rgba(255, 69, 0, 0.6)', // Red-orange for higher density
+                1, 'rgba(255, 0, 0, 1)', // Red for high density
               ],
               'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 2, 15, 20],
               'heatmap-opacity': 0.8,
             },
           });
-          // Add a circle layer for points
           mapInstance.addLayer({
             id: 'health-points',
             type: 'circle',
             source: 'health-data',
-            minzoom: 5,
+            minzoom: 12,
             paint: {
               // Increase the size of the circle points based on health score
               'circle-radius': ['interpolate', ['linear'], ['get', 'healthScore'], 0, 15, 100, 16],
@@ -111,14 +113,14 @@ const MapView = () => {
                 'interpolate',
                 ['linear'],
                 ['get', 'healthScore'],
-                0, 'rgba(0, 0, 255, 1)', // Blue for healthScore 0
+                0, 'rgba(128, 128, 0, 1)', // Blue for healthScore 0
                 100, 'rgba(255, 0, 0, 1)', // Red for healthScore 100
               ],
               'circle-stroke-color': [
                 'interpolate',
                 ['linear'],
                 ['get', 'healthScore'],
-                0, 'rgba(0, 0, 255, 1)', // Blue for healthScore 0
+                0, 'rgba(128, 128, 0, 1)', // Blue for healthScore 0
                 100, 'rgba(255, 0, 0, 1)', // Red for healthScore 100
               ],
               'circle-stroke-width': 2,
@@ -265,3 +267,4 @@ const MapView = () => {
 };
 
 export default MapView;
+ 
