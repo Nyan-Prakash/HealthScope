@@ -2,7 +2,6 @@ from fastapi import FastAPI, Form
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 import tensorflow as tf
-from neuralnet import preprocess_data
 from contextlib import asynccontextmanager
 import numpy as np
 
