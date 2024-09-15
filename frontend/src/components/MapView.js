@@ -284,7 +284,7 @@ const MapView = () => {
           valueLabelDisplay="auto"
           step={1}
           min={2016}
-          max={2024}
+          max={2029}
           marks
           color="primary"
         />
