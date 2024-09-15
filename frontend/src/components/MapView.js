@@ -45,13 +45,13 @@ const MapView = () => {
     // Create a FormData object to send to the backend
     const formData = new FormData();
     formData.append('year', year);
-
+  
     // Fetch data from the backend
     axios
       .post('/display-all-longandlat', formData)
       .then((response) => {
         const healthData = response.data; // Assume response data is an array of points
-
+  
         console.log(healthData); // Debugging: log the fetched data
         const healthDataMap = healthData.map((point) => ({
           type: 'Feature',
@@ -63,7 +63,7 @@ const MapView = () => {
             healthScore: point.Normalized_Health_Score, // Use health score for styling
           },
         }));
-
+  
         if (mapInstance.getSource('health-data')) {
           mapInstance.getSource('health-data').setData({
             type: 'FeatureCollection',
@@ -78,9 +78,8 @@ const MapView = () => {
               features: healthDataMap,
             },
           });
+  
           // Add heatmap layer
-          // Add a circle layer for points
-
           mapInstance.addLayer({
             id: 'health-heatmap',
             type: 'heatmap',
@@ -101,6 +100,8 @@ const MapView = () => {
               'heatmap-opacity': 0.8,
             },
           });
+  
+          // Add a circle layer for points
           mapInstance.addLayer({
             id: 'health-points',
             type: 'circle',
@@ -131,12 +132,47 @@ const MapView = () => {
               'circle-opacity': 0.5,
             },
           });
+  
+          // Add click event listener for the health-points layer
+          // Add click event listener for the health-points layer
+mapInstance.on('click', 'health-points', (e) => {
+  const coordinates = e.features[0].geometry.coordinates.slice();
+  let healthScore = e.features[0].properties.healthScore;
+
+  // Round the health score to the nearest integer
+  healthScore = Math.round(healthScore);
+
+  // Ensure that if the map is zoomed out such that multiple
+  // copies of the feature are visible, the popup appears
+  // over the copy being pointed to.
+  while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+    coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+  }
+
+  // Create a popup
+  new mapboxgl.Popup()
+    .setLngLat(coordinates)
+    .setHTML(`<strong>Health Score:</strong> ${healthScore}`)
+    .addTo(mapInstance);
+});
+
+  
+          // Change the cursor to a pointer when the mouse is over the health-points layer
+          mapInstance.on('mouseenter', 'health-points', () => {
+            mapInstance.getCanvas().style.cursor = 'pointer';
+          });
+  
+          // Change the cursor back to default when it leaves the health-points layer
+          mapInstance.on('mouseleave', 'health-points', () => {
+            mapInstance.getCanvas().style.cursor = '';
+          });
         }
       })
       .catch((error) => {
         console.error('Error fetching data from neural-network-response:', error);
       });
   };
+  
 
   const handleSliderChange = (event, newValue) => {
     setYear(newValue); // Update the year state when the slider changes
