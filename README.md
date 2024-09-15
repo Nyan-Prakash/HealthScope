@@ -1,3 +1,6 @@
+## Welcome to HealthScope
+by Hadi Benkorah, Shaunak Sinha, and Nyan Prakash
+
 ## Inspiration
 During the COVID-19 Pandemic, many of our families were left wondering what areas are safe and more prone to risk to the spread of the virus. Public health data was often mess and no one knew what areas were safe outside of there own home. Thats when my teammates and I came with our idea for HealthScope. A new way to see and visualize health data from across the United States and on dozens of different factors so that no family has to ever be left wondering if the place they live in or visit are safe and healthy. 
 
