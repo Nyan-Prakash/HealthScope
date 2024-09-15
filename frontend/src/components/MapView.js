@@ -37,7 +37,7 @@ const MapView = () => {
 
      // Fetch data from the backend
      axios
-       .post('/display-all-longandlat')
+       .post('/display-all-longandlat', formData)
        .then((response) => {
          const healthData = response.data; // Assume response data is an array of points
 
@@ -46,10 +46,10 @@ const MapView = () => {
           type: 'Feature',
           geometry: {
             type: 'Point',
-            coordinates: [point.longitude, point.latitude], // Use longitude and latitude for point locations
+            coordinates: [point.Latitude, point.Longitude], // Use longitude and latitude for point locations
           },
           properties: {
-            healthScore: point.healthScore, // Use health score for styling
+            healthScore: point.Normalized_Health_Score, // Use health score for styling
           },
         }));
         if (mapInstance.getSource('health-data')) {
@@ -109,8 +109,9 @@ const MapView = () => {
                 'interpolate',
                 ['linear'],
                 ['get', 'healthScore'],
-                0, 'rgba(255, 255, 255, 0)', // Transparent at health score 0
-                100, 'rgba(255, 0, 0, 1)',
+                0, 'rgba(255, 0, 0, 1)',
+                50, 'rgba(255, 165, 0, 1)',
+                100, 'rgba(0, 255, 0, 1)',
               ],
               'circle-stroke-width': 2,
               'circle-opacity': 0.5,
