@@ -17,6 +17,7 @@ const MapView = () => {
   const [zoom, setZoom] = useState(10);
   const [sidePanelOpen, setSidePanelOpen] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
+  const [GraphData, setGraphData] = useState(null);
 
   useEffect(() => {
     // Initialize the map
@@ -156,12 +157,25 @@ const MapView = () => {
             while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
               coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
             }
+            axios.post('/health-graph-score', formData)
+            .then((response) => {
+              // Map API response data to your custom labels
+              const responseData = response.data[0];
+              
+
           
+              setGraphData(responseData); // Set selected data with custom labels
+            })
+            .catch((error) => {
+              console.error('Error fetching additional data:', error);
+            });
             // Make the asynchronous request to get additional data
             axios.post('/health-information', formData)
   .then((response) => {
     // Map API response data to your custom labels
-    const responseData = response.data[0]; 
+    const responseData = response.data[0];
+    setGraphData(responseData);
+    
 
     // Map the response data to your custom labels
     const customData = {
@@ -175,7 +189,6 @@ const MapView = () => {
       'Blood Pressure': responseData.BPMED_CrudePrev
       // Add more custom labels and corresponding data here
     };
-    console.log(responseData.ARTHRITIS_CrudePrev); // Debugging: log the custom data
 
     setSelectedData(customData); // Set selected data with custom labels
     setSidePanelOpen(true); // Open side panel
@@ -222,7 +235,7 @@ const MapView = () => {
   return (
     <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', margin: 0 }}>
       {/* Zoom In and Out Buttons */}
-      <SidePanel isOpen={sidePanelOpen} onClose={closeSidePanel} data={selectedData} />
+      <SidePanel isOpen={sidePanelOpen} onClose={closeSidePanel} data={selectedData} graphDatas={GraphData} />
 
       <div style={{ position: 'absolute', top: '80px', left: '10px', zIndex: 1 }}>
         <button
@@ -306,7 +319,7 @@ const MapView = () => {
           valueLabelDisplay="auto"
           step={1}
           min={2016}
-          max={2029}
+          max={2024}
           marks
           color="primary"
         />

@@ -1,9 +1,10 @@
 import React from 'react';
 import './Sidepanel.css'; // Import the CSS for animations
 import { LineChart } from '@mui/x-charts/LineChart';
+import { stepConnectorClasses } from '@mui/material';
 
 
-const SidePanel = ({ isOpen, onClose, data , xset, yset}) => {
+const SidePanel = ({ isOpen, onClose, data , graphDatas}) => {
   return (
     <div className={`side-panel ${isOpen ? 'open' : ''}`}>
       <button className="close-btn" onClick={onClose}>
@@ -20,25 +21,21 @@ const SidePanel = ({ isOpen, onClose, data , xset, yset}) => {
               </div>
             ))}
           </div>
+          <div>
+      <LineChart
+      xAxis={graphDatas.years}
 
+      series={graphDatas.health-stepConnectorClasses}
+      width={500}
+      height={300}
+    />
+      </div>
 
         </div>
       ) : (
         <p>No data available</p>
       )}
-      <div>
-      <LineChart
-      xAxis={[{ data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] }]}
-
-      series={[
-        {
-            data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-        },
-      ]}
-      width={500}
-      height={300}
-    />
-      </div>
+      
 
     </div>
   );
